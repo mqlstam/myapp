@@ -186,6 +186,49 @@ app.get('/api/user/profile', verifyToken, (req, res) => {
   }
 });
 
+app.get('/api/user/:userId', verifyToken, (req, res) => {
+  const requestedUserId = req.params.userId;
+  const loggedInUserId = req.userId;
+
+  if (!database[requestedUserId]) {
+    res.status(404).send({ error: `User with id ${requestedUserId} not found` });
+  } else {
+    // Hardcoded response since the database is not ready yet
+    const userDetails = {
+      id: requestedUserId,
+      email: database[requestedUserId].email,
+      meals: [
+        {
+          id: 1,
+          title: "Pasta Bolognese",
+          date: "2023-05-01",
+          time: "18:00",
+          description: "Delicious homemade pasta with Bolognese sauce",
+          imageUrl: "https://example.com/pasta-bolognese.jpg",
+          vegetarian: false,
+          vegan: false
+        },
+        {
+          id: 2,
+          title: "Vegan Burger",
+          date: "2023-05-02",
+          time: "19:00",
+          description: "Tasty vegan burger with fresh vegetables and homemade sauce",
+          imageUrl: "https://example.com/vegan-burger.jpg",
+          vegetarian: true,
+          vegan: true
+        }
+      ]
+    };
+
+    if (requestedUserId === loggedInUserId) {
+      userDetails.password = database[requestedUserId].password;
+    }
+
+    res.send({ message: `Retrieved details for user ${requestedUserId}`, data: userDetails });
+  }
+});
+
 
 
 
