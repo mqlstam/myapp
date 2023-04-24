@@ -261,6 +261,22 @@ function isValidPhoneNumber(phoneNumber) {
   return phoneNumber && phoneNumber.length === 10;
 }
 
+app.delete('/api/user/:userId', verifyToken, (req, res) => {
+  const requestedUserId = req.params.userId;
+  const loggedInUserId = req.userId;
+
+  if (!database[requestedUserId]) {
+    res.status(404).send({ error: `User with id ${requestedUserId} not found` });
+  } else if (requestedUserId !== loggedInUserId) {
+    res.status(403).send({ error: 'You are not allowed to delete this user data' });
+  } else {
+    // Hardcoded deletion since the database is not ready yet
+    delete database[requestedUserId];
+
+    res.send({ message: `User with ID ${requestedUserId} has been deleted` });
+  }
+});
+
 
 
 
