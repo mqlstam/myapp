@@ -229,6 +229,38 @@ app.get('/api/user/:userId', verifyToken, (req, res) => {
   }
 });
 
+app.put('/api/user/:userId', verifyToken, (req, res) => {
+  const requestedUserId = req.params.userId;
+  const loggedInUserId = req.userId;
+
+  if (!database[requestedUserId]) {
+    res.status(404).send({ error: `User with id ${requestedUserId} not found` });
+  } else if (requestedUserId !== loggedInUserId) {
+    res.status(403).send({ error: 'You are not allowed to update this user data' });
+  } else {
+    // Validate the input data
+    const { email, phoneNumber } = req.body;
+
+    if (!email) {
+      res.status(400).send({ error: 'Email address is required' });
+    } else if (!isValidPhoneNumber(phoneNumber)) {
+      res.status(400).send({ error: 'Phone number is not valid' });
+    } else {
+      // Hardcoded update since the database is not ready yet
+      database[requestedUserId].email = email;
+      database[requestedUserId].phoneNumber = phoneNumber;
+
+      res.send({ message: `Updated details for user ${requestedUserId}`, data: database[requestedUserId] });
+    }
+  }
+});
+
+function isValidPhoneNumber(phoneNumber) {
+  // Add your phone number validation logic here
+  // This is a simple example that checks if the phone number is 10 digits long
+  return phoneNumber && phoneNumber.length === 10;
+}
+
 
 
 
