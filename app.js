@@ -4,10 +4,35 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
 const port = 3000;
-
 const database = {
-  users: {},
-  meals: {},
+  users: {
+    0: {
+      id: 0,
+      email: 'admin@example.com',
+      password: '$2b$10$RQyQ2uDff8TQG2QjKzOnZuVf.9/8pWJ7vMnTdD6s7Yqs8FpDBx7o6', // Password is 'admin123'
+      admin: true,
+    },
+    1: {
+      id: 1,
+      email: 'jane.doe@example.com',
+      password: '$2b$10$RQyQ2uDff8TQG2QjKzOnZuVf.9/8pWJ7vMnTdD6s7Yqs8FpDBx7o6', // Password is 'password123'
+      admin: false,
+    },
+    2: {
+      id: 2,
+      email: 'john.doe@example.com',
+      password: '$2b$10$RQyQ2uDff8TQG2QjKzOnZuVf.9/8pWJ7vMnTdD6s7Yqs8FpDBx7o6', // Password is 'password123'
+      admin: false,
+    },
+    3: {
+      id: 3,
+      email: 'test@example.com',
+      password: '$2b$10$RQyQ2uDff8TQG2QjKzOnZuVf.9/8pWJ7vMnTdD6s7Yqs8FpDBx7o6', // Password is 'test123'
+      admin: false,
+    },
+  },
+
+meals: {},
 };
 let nextUserId = 0;
 let nextMealId = 0;
@@ -90,7 +115,7 @@ app.post('/login', async (req, res) => {
 });
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers['x-access-token'];
+  const token = req.headers['eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjgxOTA1NDI1LCJleHAiOjE2ODE5MDkwMjV9.O-4ipeH7ZMBrcI-TfGUqN-RdKlXJTYTpVX_TDkjzvW8'];
   if (!token) {
   return res.status(403).send({ error: 'No token provided' });
   }
@@ -233,6 +258,11 @@ res.send({ message: `User with ID ${requestedUserId} has been deleted` });
 }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
-});  
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Example app listening at http://localhost:${port}`);
+  });
+}
+
+
+module.exports = app;
