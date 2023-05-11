@@ -1,23 +1,40 @@
 {
-  "name": "myapp",
+  "name": "les-1",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "express server",
+  "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js",
-    "test": "mocha 'test/info.test.js' --exit"
+    "dev": "nodemon index.js",
+    "test": "mocha test/**/*.test.js --exit"
   },
-  "author": "",
+  "keywords": [
+    "javascript",
+    "nodejs",
+    "express"
+  ],
+  "author": "david",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.0",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
-    "mocha": "^10.2.0"
+    "mysql": "^2.18.1",
+    "mysql2": "^3.2.3",
+    "tracer": "^1.1.6",
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "chai": "^4.3.7",
     "chai-http": "^4.3.0",
-    "nodemon": "^2.0.22"
+    "mocha": "^10.2.0",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.7"
+  },
+  "prettier": {
+    "trailingComma": "none",
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true
   }
 }
