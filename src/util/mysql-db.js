@@ -4,11 +4,11 @@ const logger = require('../util/utils').logger;
 
 // Create the connection pool. The pool-specific settings are the defaults
 const pool = mysql.createPool({
-  host: process.env.DB_HOST ,
-  user: process.env.DB_USER,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  password: process.env.DB_PASSWORD,
+  host: 'db-mysql-ams3-46626-do-user-8155278-0.b.db.ondigitalocean.com',
+  user: '2159021',
+  database: '2159021',
+  port: 25060,
+  password: 'secret',
   waitForConnections: true,
   connectionLimit: 10,
   maxIdle: 10, // max idle connections, the default value is the same as `connectionLimit`
