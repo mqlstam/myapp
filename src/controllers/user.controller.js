@@ -54,7 +54,6 @@ const userController = {
   },
   getAllUsers: async (req, res, next) => {
     logger.info('Get all users');
-    logger.info(process.env);
 
     // Check if the user is authenticated and has a valid token
     // const token = req.headers.authorization;
