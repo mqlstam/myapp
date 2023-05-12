@@ -3,7 +3,7 @@ const logger = require('../util/utils').logger;
 const assert = require('assert');
 const pool = require('../util/mysql-db');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 const validator = require('validator');
 
