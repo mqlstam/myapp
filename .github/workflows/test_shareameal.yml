@@ -52,5 +52,5 @@ jobs:
         with:
           app-name: 'shareameal'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_512374C4683F4406B46D86CF1A927959 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8D4AE7D9706F463A8F08CD94357D748F }}
           package: .
