@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/authentication.controller');
 
 // Route for user login
-router.post('/login', authController.validateLogin, authController.login);
+router.post('/login', authController.login);
 
 // Route for token validation
 router.get('/validate-token', authController.validateToken, (req, res) => {

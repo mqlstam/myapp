@@ -42,7 +42,7 @@ app.get('/api/info', (req, res) => {
 // Hier staan de referenties naar de routes
 app.use('/api/user', userRoutes);
 
-app.use('/api/login', authRoutes);
+app.use('/api/', authRoutes);
 
 
 // Wanneer geen enkele endpoint matcht kom je hier terecht. Dit is dus
