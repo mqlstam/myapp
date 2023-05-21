@@ -8,29 +8,45 @@ const { logger, jwtSecretKey } = require('../util/utils');
 const bcrypt = require('bcryptjs');
 
 module.exports = {
-  login(req, res, next) {
-    const { emailAdress, password } = req.body;
-    console.log("login called")
+login(req, res, next) {
+  const { emailAdress, password } = req.body; 
+  logger.trace('login called');
+  console.log(req.body);
+  if (!emailAdress || !password) {
+    return res.status(400).send({
+      code: 400,
+      message: "Required field is missing",
+      data: {}
+    });
+  }
   
-    pool.getConnection()
-      .then(connection => {
-        console.log("login calleddd")
-        connection.query('SELECT * FROM `user` WHERE emailAdress = ?', [emailAdress])
-          .then(([users]) => {
-            if (users.length === 0) {
-              return res.status(401).send({ error: "Not Authorized" });
-            }
-            const user = users[0];
-            return bcrypt.compare(password, user.password)
-              .then(passwordMatch => {
-                if (!passwordMatch) {
-                  return res.status(401).send({ error: "Not Authorized" });
-                }
-                const payload = { userId: user.id };
-                const token = jwt.sign(payload, jwtSecretKey);
-                res.send({ token });
+  pool.getConnection()
+    .then(connection => {
+      connection.query('SELECT * FROM `user` WHERE emailAdress = ?', [emailAdress])
+        .then(([users]) => {
+          if (users.length === 0) {
+            return res.status(404).send({ error: "User not found" }); // Return 404 instead of 400
+          }  
+          
+          const user = users[0];
+          return bcrypt.compare(password, user.password)
+            .then(passwordMatch => {
+              if (!passwordMatch) {
+                return res.status(400).send({ error: "Invalid password" });  
+              }
+              const payload = { userId: user.id };
+              const token = jwt.sign(payload, jwtSecretKey);
+              res.send({
+                code: 200,
+                data: {
+                  id: user.id,
+                  email: user.emailAdress,
+                  token
+                },
+                message: "Login successful"
               });
-          })
+            });
+        })
           .catch(error => {
             next({
               code: 500,
@@ -49,7 +65,6 @@ module.exports = {
         });
       });
   },
-
   validateToken(req, res, next) {
     logger.trace('validateToken called');
     const authHeader = req.headers.authorization;

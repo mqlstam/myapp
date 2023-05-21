@@ -58,7 +58,8 @@ const userController = {
     let sqlStatement = 'SELECT * FROM `user`';
     // Handle the query parameters
     const queryParams = req.query;
-    const validFields = ["isactive", "name", "emailAdressAdress"]; // You can add more valid fields here
+const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "password", "phoneNumber", "roles", "street", "city"];
+
     const sqlParams = [];
     let isFirst = true;
     for (const key in queryParams) {
@@ -190,8 +191,12 @@ const userController = {
   updateUser: async (req, res, next) => {
     // Get the user id from the request parameters
     const userId = req.params.id;
-  
-    // Extract the necessary fields from the request body
+
+    // Check if the user making the request is the same as the user being updated
+    if (req.user !== userId) {
+      return res.status(403).send({ error: "You can only update your own data" });
+    }
+   // Extract the necessary fields from the request body
     const { emailAdress,password, firstName, lastName, phoneNumber, isActive, roles, street, city } = req.body;
     
     if (!emailAdress) {
@@ -259,7 +264,11 @@ const userController = {
   deleteUser: async (req, res, next) => {
     // Get the user id from the request parameters
     const userId = req.params.id;
-
+  
+    // Check if the user making the request is the same as the user being deleted
+    if (req.user !== userId) {
+      return res.status(403).send({ error: "You can only delete your own data" });
+    }
     let sqlStatement = 'DELETE FROM `user` WHERE id=?';
 
     try {
