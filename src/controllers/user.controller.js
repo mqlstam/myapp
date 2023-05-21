@@ -10,36 +10,37 @@ const validator = require('validator');
 const userController = {
   createUser: async (req, res, next) => {
     const { emailAdress, password, firstName, lastName, street, city } = req.body;
-
+  
     // Validate the incoming data
     if (!emailAdress || !password) {
-      return res.status(400).send({ error: "Email and password are required" });
+      return res.status(400).json({ code: 400, message: "Required field is missing", data: {} });
     }
     if (!validator.isEmail(emailAdress)) {
-      return res.status(400).send({ error: "Invalid emailAdress format" });
+      return res.status(400).json({ code: 400, message: "Invalid email address", data: {} });
     }
     if (password.length < 8) {
-      return res.status(400).send({ error: "Password must be at least 8 characters long" });
+      return res.status(400).json({ code: 400, message: "Invalid password", data: {} });
     }
-
+  
     try {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+  
       const conn = await pool.getConnection();
       try {
         const [rows] = await conn.query('SELECT emailAdress FROM user WHERE emailAdress = ?', [emailAdress]);
         if (rows.length > 0) {
-          return res.status(409).send({ error: "Email already exists" });
+          return res.status(403).json({ code: 403, message: "User already exists", data: {} });
         } else {
           const [result] = await conn.query('INSERT INTO user (firstname, lastname, emailAdress, password, street, city) VALUES (?, ?, ?, ?, ?, ?)', [firstName, lastName, emailAdress, hashedPassword, street, city]);
           // Return the data and identification number of the added user
-          return res.send({ message: `Registered emailAdress ${emailAdress}`, data: { id: result.insertId, emailAdress } });
+          return res.status(200).json({ code: 200, message: "User successfully registered", data: { id: result.insertId, email: emailAdress } });
         }
       } catch (error) {
         logger.error(error.message);
         return next({
           code: 500,
-          message: 'Database error'
+          message: 'Database error',
+          data: {}
         });
       } finally {
         conn.release();
@@ -48,10 +49,12 @@ const userController = {
       logger.error(error.message);
       return next({
         code: 500,
-        message: 'Internal server error'
+        message: 'Internal server error',
+        data: {}
       });
     }
   },
+  
   getAllUsers: async (req, res, next) => {
     logger.info('Get all users');
 

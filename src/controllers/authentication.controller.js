@@ -11,7 +11,6 @@ module.exports = {
 login(req, res, next) {
   const { emailAdress, password } = req.body; 
   logger.trace('login called');
-  console.log(req.body);
   if (!emailAdress || !password) {
     return res.status(400).send({
       code: 400,

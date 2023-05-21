@@ -9,37 +9,38 @@ const jwt = require('jsonwebtoken');
 const { jwtSecretKey, logger } = require('../../src/util/utils');
 require('tracer').setLevel('trace');
 
+const mysql = require('mysql2');
+const pool = require('../../src/util/mysql-db');
+
 chai.should();
 chai.use(chaiHttp);
 
-/**
- * Db queries to clear and fill the test database before each test.
- *
- * LET OP: om via de mysql2 package meerdere queries in één keer uit te kunnen voeren,
- * moet je de optie 'multipleStatements: true' in de database config hebben staan.
- */
+// Db queries
 const CLEAR_MEAL_TABLE = 'DELETE IGNORE FROM `meal`;';
 const CLEAR_PARTICIPANTS_TABLE = 'DELETE IGNORE FROM `meal_participants_user`;';
 const CLEAR_USERS_TABLE = 'DELETE IGNORE FROM `user`;';
-const CLEAR_DB =
-  CLEAR_MEAL_TABLE + CLEAR_PARTICIPANTS_TABLE + CLEAR_USERS_TABLE;
+const CLEAR_DB = CLEAR_MEAL_TABLE + CLEAR_PARTICIPANTS_TABLE + CLEAR_USERS_TABLE;
 
-/**
- * Voeg een user toe aan de database. Deze user heeft id 1.
- * Deze id kun je als foreign key gebruiken in de andere queries, bv insert meal.
- */
-const INSERT_USER =
-  'INSERT INTO `user` (`id`, `firstName`, `lastName`, `emailAdress`, `password`, `street`, `city` ) VALUES' +
-  '(1, "first", "last", "name@server.nl", "secret", "street", "city");';
+const INSERT_USER = 'INSERT INTO `user` (`id`, `firstName`, `lastName`, `emailAdress`, `password`, `street`, `city` ) VALUES' + '(1, "first", "last", "name@server.nl", "secret", "street", "city");';
+const INSERT_MEALS = 'INSERT INTO `meal` (`id`, `name`, `description`, `imageUrl`, `dateTime`, `maxAmountOfParticipants`, `price`, `cookId`) VALUES' + "(1, 'Meal A', 'description', 'image url', NOW(), 5, 6.50, 1)," + "(2, 'Meal B', 'description', 'image url', NOW(), 5, 6.50, 1);";
 
-/**
- * Query om twee meals toe te voegen. Let op de cookId, die moet matchen
- * met een bestaande user in de database.
- */
-const INSERT_MEALS =
-  'INSERT INTO `meal` (`id`, `name`, `description`, `imageUrl`, `dateTime`, `maxAmountOfParticipants`, `price`, `cookId`) VALUES' +
-  "(1, 'Meal A', 'description', 'image url', NOW(), 5, 6.50, 1)," +
-  "(2, 'Meal B', 'description', 'image url', NOW(), 5, 6.50, 1);";
+pool.on('connection', function (connection) {
+  connection.query(CLEAR_DB, (err, result) => {
+    if (err) throw err;
+    console.log('Database cleared.');
+
+    connection.query(INSERT_USER, (err, result) => {
+      if (err) throw err;
+      console.log('Users inserted.');
+
+      connection.query(INSERT_MEALS, (err, result) => {
+        if (err) throw err;
+        console.log('Meals inserted.');
+        logger.info(`Connected to db '${connection.config.database}' on ${connection.config.host}`);
+      });
+    });
+  });
+});
 
 
 
@@ -148,7 +149,7 @@ describe('UC-201 Registreren als nieuwe user', () => {
     it('TC-201-1 Verplicht veld ontbreekt', (done) => {
       chai
         .request(server)
-        .post('/api/user/register')
+        .post('/api/user/')
         .send({
           // Missing required field(s)
         })
@@ -167,7 +168,7 @@ describe('UC-201 Registreren als nieuwe user', () => {
     it('TC-201-2 Niet-valide emailadres', (done) => {
       chai
         .request(server)
-        .post('/api/user/register')
+        .post('/api/user/')
         .send({
           emailAdress: 'invalidemail',
           password: 'password',
@@ -187,7 +188,7 @@ describe('UC-201 Registreren als nieuwe user', () => {
     it('TC-201-3 Niet-valide wachtwoord', (done) => {
       chai
         .request(server)
-        .post('/api/user/register')
+        .post('/api/user/')
         .send({
           emailAdress: 'user@example.com',
           password: 'weak',
@@ -208,9 +209,9 @@ describe('UC-201 Registreren als nieuwe user', () => {
       // Perform any necessary setup here, e.g., adding an existing user to the database
       chai
         .request(server)
-        .post('/api/user/register')
+        .post('/api/user/')
         .send({
-          emailAdress: 'existinguser@example.com',
+          emailAdress: 'h.tank@server.com',
           password: 'password',
         })
         .end((err, res) => {
@@ -228,11 +229,18 @@ describe('UC-201 Registreren als nieuwe user', () => {
     it('TC-201-5 Gebruiker succesvol geregistreerd', (done) => {
       chai
         .request(server)
-        .post('/api/user/register')
-        .send({
-          emailAdress: 'newuser@example.com',
-          password: 'password',
-        })
+        .post('/api/user/')
+        .send( {   "firstName": "John",
+        "lastName": "Doe",
+        "isActive": 1,
+        "emailAdress": "j.dcwewoe@server.com",
+        "password": "seewerwrewrcret",
+        "phoneNumber": "06 12425475",
+        "roles": "editor,guest",
+        "street": "",
+        "city": ""
+        }
+    )
         .end((err, res) => {
           assert.ifError(err);
           res.should.have.status(200);
@@ -253,7 +261,6 @@ describe('UC-201 Registreren als nieuwe user', () => {
   describe('UC-203 Opvragen van gebruikersprofiel', () => {
     //
     beforeEach((done) => {
-      logger.trace('beforeEach called');
       // maak de testdatabase leeg zodat we onze testen kunnen uitvoeren.
       dbconnection.getConnection(function (err, connection) {
         if (err) {
