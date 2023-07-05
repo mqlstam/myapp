@@ -13,13 +13,13 @@ const userController = {
   
     // Validate the incoming data
     if (!emailAdress || !password) {
-      return res.status(400).json({ code: 400, message: "Required field is missing", data: {} });
+      return res.status(400).json({ status:400, message: "Required field is missing", data: {} });
     }
     if (!validator.isEmail(emailAdress)) {
-      return res.status(400).json({ code: 400, message: "Invalid email address", data: {} });
+      return res.status(400).json({ status:400, message: "Invalid email address", data: {} });
     }
     if (password.length < 4) {
-      return res.status(400).json({ code: 400, message: "Invalid password", data: {} });
+      return res.status(400).json({ status:400, message: "Invalid password", data: {} });
     }
   
     try {
@@ -29,16 +29,16 @@ const userController = {
       try {
         const [rows] = await conn.query('SELECT emailAdress FROM user WHERE emailAdress = ?', [emailAdress]);
         if (rows.length > 0) {
-          return res.status(403).json({ code: 403, message: "User already exists", data: {} });
+          return res.status(403).json({ status:403, message: "User already exists", data: {} });
         } else {
           const [result] = await conn.query('INSERT INTO user (firstname, lastname, emailAdress, password, street, city) VALUES (?, ?, ?, ?, ?, ?)', [firstName, lastName, emailAdress, hashedPassword, street, city]);
           // Return the data and identification number of the added user
-          return res.status(201).json({ code: 201, message: "User successfully registered", data: { id: result.insertId, email: emailAdress } });
+          return res.status(201).json({ status:201, message: "User successfully registered", data: { id: result.insertId, email: emailAdress } });
         }
       } catch (error) {
         logger.error(error.message);
         return next({
-          code: 500,
+          status:500,
           message: 'Database error',
           data: {}
         });
@@ -48,7 +48,7 @@ const userController = {
     } catch (error) {
       logger.error(error.message);
       return next({
-        code: 500,
+        status:500,
         message: 'Internal server error',
         data: {}
       });
@@ -89,14 +89,14 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
         const [results] = await conn.query(sqlStatement, sqlParams);
         logger.info('Found', results.length, 'results');
         return res.status(200).json({
-          code: 200,
+          status:200,
           message: 'User getAll endpoint',
           data: results
         });
       } catch (error) {
         logger.error(error.message);
         return next({
-          code: 409,
+          status:409,
           message: error.message
         });
       } finally {
@@ -105,7 +105,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
     } catch (err) {
       logger.error(err.code, err.syscall, err.address, err.port);
       return next({
-        code: 500,
+        status:500,
         message: err.code
       });
     }
@@ -130,14 +130,14 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
         const [meals] = await conn.query('SELECT * FROM `meal` WHERE id=?', [userId]);
         logger.trace('Found', results.length, 'results');
         return res.status(200).json({
-          code: 200,
+          status:200,
           message: 'Get User profile',
           data: { ...results[0], meals }
         });
       } catch (error) {
         logger.error(error.message);
         return next({
-          code: 409,
+          status:409,
           message: error.message
         });
       } finally {
@@ -146,7 +146,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
     } catch (err) {
       logger.error(err.code, err.syscall, err.address, err.port);
       return next({
-        code: 500,
+        status:500,
         message: err.code
       });
     }
@@ -171,7 +171,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
   
         // Return a success response with the user details and associated meals data
         return res.status(200).json({
-          code: 200,
+          status:200,
           message: 'Get user by ID',
           data: {
             user: userResults[0],
@@ -181,7 +181,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
       } catch (error) {
         logger.error(error.message);
         return next({
-          code: 409,
+          status:409,
           message: error.message
         });
       } finally {
@@ -190,7 +190,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
     } catch (err) {
       logger.error(err.code, err.syscall, err.address, err.port);
       return next({
-        code: 500,
+        status:500,
         message: err.code
       });
     }
@@ -251,7 +251,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
   
         // Return the updated user data
         return res.status(200).json({
-          code: 200,
+          status:200,
           message: 'User data updated',
           data: {
             id: userId,
@@ -268,7 +268,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
       } catch (error) {
         logger.error(error.message);
         return next({
-          code: 409,
+          status:409,
           message: error.message
         });
       } finally {
@@ -277,7 +277,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
     } catch (err) {
       logger.error(err.code, err.syscall, err.address, err.port);
       return next({
-        code: 500,
+        status:500,
         message: err.code
       });
     }
@@ -308,7 +308,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
   
         // Return a success response with a confirmation message
         return res.status(200).json({
-          code: 200,
+          status:200,
           message: 'User deleted',
           data: {
             id: userId
@@ -317,7 +317,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
       } catch (error) {
         logger.error(error.message);
         return next({
-          code: 409,
+          status:409,
           message: error.message
         });
       } finally {
@@ -326,7 +326,7 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
     } catch (err) {
       logger.error(err.code, err.syscall, err.address, err.port);
       return next({
-        code: 500,
+        status:500,
         message: err.code
       });
     }

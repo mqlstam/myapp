@@ -10,7 +10,7 @@ module.exports = {
     logger.trace('login called');
     if (!emailAdress || !password) {
       return res.status(400).send({
-        code: 400,
+        status:400,
         message: "Required field is missing",
         data: {}
       });
@@ -33,7 +33,7 @@ module.exports = {
                 const payload = { userId: user.id };
                 const token = jwt.sign(payload, jwtSecretKey);
                 res.send({
-                  code: 200,
+                  status:200,
                   data: {
                     id: user.id,
                     email: user.emailAdress,
@@ -45,7 +45,7 @@ module.exports = {
           })
           .catch(error => {
             next({
-              code: 500,
+              status:500,
               message: error.message
             });
           })
@@ -56,7 +56,7 @@ module.exports = {
       .catch(err => {
         logger.error('Error getting connection from pool');
         next({
-          code: 500,
+          status:500,
           message: err.code
         });
       });
@@ -67,7 +67,7 @@ module.exports = {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       next({
-        code: 401,
+        status:401,
         message: 'Authorization header missing!',
         data: undefined
       });
@@ -79,7 +79,7 @@ module.exports = {
         next();
       } catch (error) {
         next({
-          code: 401,
+          status:401,
           message: 'Invalid token',
           data: undefined
         });
