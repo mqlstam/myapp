@@ -7,19 +7,22 @@ const app = require('../../index');
 chai.use(chaiHttp);
 
 // Replace these with your actual login credentials
-const emailAdress = 'test@example.com';
-const password = 'testpassword';
+const emailAdress = 'rsdf.vandam@server.nl';
+const password = 'secret';
 
 let authToken;
 
 before(async () => {
+  
   const res = await chai.request(app)
-    .post('/src/controllers/authentication.controller.js') // Replace this with your login endpoint
-    .send({ emailAdress, password });
+    .post('/api/login')  
+    .send({ 
+      emailAdress: 'rsdf.vandam@server.nl', 
+      password: 'secret' 
+    });
 
   authToken = res.body.data.token;
 });
-
 describe('UC-301: Toevoegen van maaltijd', () => {
   describe('TC-301-1: Verplicht veld ontbreekt', () => {
     it('should return 400 when a required field is missing', (done) => {
@@ -36,7 +39,7 @@ describe('UC-301: Toevoegen van maaltijd', () => {
       };
 
       chai.request(app)
-        .post('/src/controllers/meal.controller.js') 
+        .post('/api/meal') 
         .set('Authorization', `Bearer ${authToken}`)
         .send(newMeal)
         .end((err, res) => {
@@ -62,7 +65,7 @@ describe('UC-301: Toevoegen van maaltijd', () => {
       };
 
       chai.request(app)
-        .post('/src/controllers/meal.controller.js') // Replace this with your endpoint for adding a meal
+        .post('/api/meal') // Replace this with your endpoint for adding a meal
         .send(newMeal)
         .end((err, res) => {
           expect(err).to.be.null;
@@ -73,26 +76,31 @@ describe('UC-301: Toevoegen van maaltijd', () => {
   });
 
   describe('TC-301-3: Maaltijd succesvol toegevoegd', () => {
-    it('should return 201 when a meal is successfully added', (done) => {
+    it('should return 201 when a meal is successfully added', function(done) { // Change to regular function
+  
       const newMeal = {
-        name: 'Test meal',
-        description: 'Test meal description',
-        dateTime: '2023-07-10T14:00:00',
-        maxAmountOfParticipants: 10,
-        price: 15.50,
-        isActive: true,
-        isVega: false,
-        isVegan: false,
-        isToTakeHome: false,
+        "name": "Delicious Pasafeasta",
+        "description": "A tasty pasta dish with tomato sauce and fresh basil",
+        "location": "Amsterdam",
+        "dateTime": "2023-08-01 12:00:00",
+        "maxAmountOfParticipants": 10,
+        "isActive": true,
+        "isVega": true,
+        "isVegan": false,
+        "isToTakeHome": false,
+        "price": 8.5,
+        "imageUrl": "https://example.com/pasta.jpg",
+        "allergenes": "Gluten"
       };
 
       chai.request(app)
-        .post('/src/controllers/meal.controller.js') // Replace this with your endpoint for adding a meal
+        .post('/api/meal') // Replace this with your endpoint for adding a meal
         .set('Authorization', `Bearer ${authToken}`)
         .send(newMeal)
         .end((err, res) => {
           expect(err).to.be.null;
           expect(res).to.have.status(201);
+          
           done();
         });
     });

@@ -4,19 +4,22 @@ const logger = require('../util/utils').logger;
 
 module.exports = {
   async getAllMeals(req, res) {
-    const meals = await pool.query('SELECT * FROM meal');
+    const meals = await pool.query(
+      'SELECT id, name, description, imageurl, datetime, maxamountofparticipants, price, cookid FROM meal' 
+    );
     return res.status(200).json(meals);
   },
 
   async getMealById(req, res) {
     const { mealId } = req.params;
-    const [meal] = await pool.query('SELECT * FROM meal WHERE id = ?', [mealId]);
-
+    const [meal] = await pool.query(
+      'SELECT id, name, description, imageurl, datetime, maxamountofparticipants, price, cookid FROM meal WHERE id = ?', 
+      [mealId]  
+    );
     if (meal.length === 0) {
-      return res.status(404).json({ code: 404, message: "Meal not found" });
+      return res.status(404).json({ code: 404, message: "Meal not found" });  
     }
-
-    return res.status(200).json(meal[0]);
+    return res.status(200).json(meal[0]);   
   },
 
   async addMeal(req, res) {

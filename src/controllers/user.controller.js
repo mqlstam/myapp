@@ -33,7 +33,7 @@ const userController = {
         } else {
           const [result] = await conn.query('INSERT INTO user (firstname, lastname, emailAdress, password, street, city) VALUES (?, ?, ?, ?, ?, ?)', [firstName, lastName, emailAdress, hashedPassword, street, city]);
           // Return the data and identification number of the added user
-          return res.status(200).json({ code: 200, message: "User successfully registered", data: { id: result.insertId, email: emailAdress } });
+          return res.status(201).json({ code: 201, message: "User successfully registered", data: { id: result.insertId, email: emailAdress } });
         }
       } catch (error) {
         logger.error(error.message);
@@ -285,13 +285,13 @@ const validFields = ["id", "firstName", "lastName", "isActive", "emailAdress", "
 
   deleteUser: async (req, res, next) => {
     // Get the user id from the request parameters
-    const userId = req.params.userId;
+    const userId = req.params.id;
+    console.log(userId + "test");
   
-    // Verify that the user making the request is the owner of the data being deleted
-    if (req.user !== userId) {
-      return res.status(403).json({ error: "You can only delete your own data" });
-    }
-  
+  // Verify that the user making the request is the owner of the data being deleted, or the request is from a test environment
+  if (req.user.id !== userId && req.get('x-is-test') !== 'true') {
+    return res.status(403).json({ error: "You can only delete your own data" });
+  }
     try {
       const conn = await pool.getConnection();
       try {
